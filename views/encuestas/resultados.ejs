@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados de Encuesta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<style>
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<body class="bg-gray-50 text-gray-800">
+  <%- include('../partials/navbar', { class: "no-print" }) %>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <hr class="my-4">
+    <div class="flex gap-4 mb-6 no-print">
+      <a href="/encuestas/<%= encuesta._id %>/exportar/json"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+        📄 Exportar JSON
+      </a>
+      <a href="/encuestas/<%= encuesta._id %>/exportar/csv"
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        📊 Exportar CSV
+      </a>
+  <a href="/encuestas/<%= encuesta._id %>/exportar/pdf"
+  class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+  🖨️ Exportar PDF
+</a>
+    </div>
+
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold mb-2">Resultados de: <%= encuesta.titulo %></h1>
+      <p class="text-sm text-gray-600"><strong>📅 Fecha de creación:</strong> <%= encuesta.fechaCreacion.toLocaleDateString() %></p>
+      <p class="text-sm text-gray-600"><strong>👥 Total de respuestas:</strong> <%= totalRespuestas %></p>
+      <p class="text-sm text-gray-600 mb-4"><strong>❓ Total de preguntas:</strong> <%= totalPreguntas %></p>
+      <hr class="my-4">
+    </div>
+
+    <!-- Gráficos generales -->
+    <section class="mb-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-2">📊 Respuestas por semana</h3>
+          <canvas id="graficoSemanal" class="w-full h-64"></canvas>
+        </div>
+
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-2">🎂 Distribución por Edad</h3>
+          <canvas id="graficoEdad" class="w-full h-64"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <hr class="my-6">
+
+    <!-- Análisis por pregunta -->
+    <section>
+      <h3 class="text-xl font-semibold mb-4">🧠 Análisis por Pregunta</h3>
+      <div id="analisisPreguntasContainer" class="space-y-6">
+        <% analisisPorPregunta.forEach((item, i) => { %>
+          <div class="bg-white shadow-md rounded-lg p-5" id="analisis-<%= item.preguntaId %>" data-index="<%= i %>">
+            <h4 class="font-semibold text-lg mb-4"><%= i + 1 %>. <%= item.texto %></h4>
+            
+            <% if (item.tipo === 'cerrada') { %>
+              <canvas id="grafico-pregunta-<%= i %>" class="w-full h-64"></canvas>
+            <% } else if (item.tipo === 'abierta') { %>
+              <p class="font-medium mb-1">Respuestas:</p>
+              <ul class="list-disc list-inside text-gray-600">
+                <% if (item.respuestas.length > 0) { %>
+                  <% item.respuestas.forEach(r => { %>
+                    <li>"<%= r %>"</li>
+                  <% }) %>
+                <% } else { %>
+                  <li>No hay respuestas aún.</li>
+                <% } %>
+              </ul>
+            <% } else if (item.tipo === 'escala') { %>
+              <p class="text-gray-700"><strong>Promedio:</strong> <%= item.promedio %></p>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const socket = io();
+    const encuestaId = "<%= encuesta._id %>";
+    socket.emit('unirSalaEncuesta', encuestaId);
+
+    // Gráfico semanal
+    let etiquetas = <%- JSON.stringify(Object.keys(respuestasPorSemana)) %>;
+    let datosSemanal = <%- JSON.stringify(Object.values(respuestasPorSemana)) %>;
+    const ctx1 = document.getElementById('graficoSemanal').getContext('2d');
+    const graficoSemanal = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: etiquetas,
+        datasets: [{
+          label: 'Respuestas',
+          data: datosSemanal,
+          backgroundColor: '#60a5fa'
+        }]
+      }
+    });
+
+    // Gráfico por edad
+    let etiquetasEdad = <%- JSON.stringify(Object.keys(distribucionEdad)) %>;
+    let datosEdad = <%- JSON.stringify(Object.values(distribucionEdad)) %>;
+    const ctx2 = document.getElementById('graficoEdad').getContext('2d');
+    const graficoEdad = new Chart(ctx2, {
+      type: 'pie',
+      data: {
+        labels: etiquetasEdad,
+        datasets: [{
+          data: datosEdad,
+          backgroundColor: ['#f87171', '#60a5fa', '#a78bfa', '#facc15']
+        }]
+      }
+    });
+
+    // Crear gráficos por pregunta cerrada
+    <% analisisPorPregunta.forEach((item, i) => { %>
+      <% if (item.tipo === 'cerrada') { %>
+        const ctxPregunta<%= i %> = document.getElementById('grafico-pregunta-<%= i %>').getContext('2d');
+        new Chart(ctxPregunta<%= i %>, {
+          type: 'bar',
+          data: {
+            labels: <%- JSON.stringify(Object.keys(item.conteo)) %>,
+            datasets: [{
+              label: 'Votos',
+              data: <%- JSON.stringify(Object.values(item.conteo)) %>,
+              backgroundColor: '#34d399'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: {
+                display: true,
+                text: 'Distribución de respuestas'
+              }
+            }
+          }
+        });
+      <% } %>
+    <% }) %>
+
+    // Escuchar actualizaciones en tiempo real
+    socket.on('actualizacionResultados', (data) => {
+      graficoSemanal.data.labels = Object.keys(data.respuestasPorSemana);
+      graficoSemanal.data.datasets[0].data = Object.values(data.respuestasPorSemana);
+      graficoSemanal.update();
+
+      graficoEdad.data.labels = Object.keys(data.distribucionEdad);
+      graficoEdad.data.datasets[0].data = Object.values(data.distribucionEdad);
+      graficoEdad.update();
+      // Aquí podrías regenerar los gráficos cerrados si deseas actualizaciones en vivo
+    });
+  </script>
+
+  <%- include('../partials/footer', { class: "no-print" }) %>
+</body>
+
+</html>

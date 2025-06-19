@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title><%= encuesta.titulo %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-2 text-center text-purple-700"><%= encuesta.titulo %></h1>
+    <p class="text-center text-gray-600 mb-8"><%= encuesta.descripcion %></p>
+
+    <form action="/encuestas/<%= encuesta._id %>/responder" method="POST" class="bg-white p-6 rounded shadow-md space-y-6">
+      <% encuesta.preguntas.forEach((pregunta, index) => { %>
+        <div class="space-y-2">
+          <label class="block font-semibold text-lg"><%= pregunta.texto %></label>
+
+          <% if (pregunta.tipo === 'abierta') { %>
+            <textarea name="respuestas[<%= index %>][respuesta]" rows="4" 
+                      class="w-full p-3 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                      required></textarea>
+
+          <% } else if (pregunta.tipo === 'cerrada') { %>
+            <% if (pregunta.opciones.length > 0) { %>
+              <div class="space-y-1">
+                <% pregunta.opciones.forEach(opcion => { %>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="respuestas[<%= index %>][respuesta]" value="<%= opcion %>" required>
+                    <span><%= opcion %></span>
+                  </label>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <p class="text-sm text-red-500">Esta pregunta no tiene opciones definidas.</p>
+            <% } %>
+
+          <% } else if (pregunta.tipo === 'escala') { %>
+            <% if (pregunta.escala && pregunta.escala.min !== undefined && pregunta.escala.max !== undefined) { %>
+              <input type="range" 
+                     name="respuestas[<%= index %>][respuesta]" 
+                     min="<%= pregunta.escala.min %>" 
+                     max="<%= pregunta.escala.max %>" 
+                     class="w-full"
+                     required>
+              <div class="text-sm text-gray-500">Escala: <%= pregunta.escala.min %> a <%= pregunta.escala.max %></div>
+            <% } else { %>
+              <p class="text-sm text-red-500">Escala no definida correctamente.</p>
+            <% } %>
+          <% } %>
+
+          <input type="hidden" name="respuestas[<%= index %>][preguntaId]" value="<%= pregunta._id %>">
+        </div>
+      <% }); %>
+
+      <div class="text-center">
+        <button type="submit" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 shadow-md">
+          Enviar Respuestas
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

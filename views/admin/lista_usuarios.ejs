@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title><%= titulo %></title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="perfil-container">
+    <h2><%= titulo %></h2>
+
+    <% if (usuarios.length === 0) { %>
+      <p>No hay usuarios registrados.</p>
+    <% } else { %>
+      <table class="perfil-tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Identificación</th>
+            <th>Correo</th>
+            <th>Rol</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% usuarios.forEach(u => { %>
+            <tr>
+              <td><%= u.nombre %></td>
+              <td><%= u.identificacion %></td>
+              <td><%= u.email %></td>
+              <td><%= u.rol %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</body>
+</html>

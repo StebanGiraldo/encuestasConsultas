@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Organización</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="perfil-container">
+    <h2>Registrar Nueva Entidad</h2>
+    <form action="/admin/usuarios" method="POST">
+      <input type="text" name="nombre" placeholder="Nombre de la organización" required><br>
+      <input type="text" name="tipoOrganizacion" placeholder="Tipo de organización" required><br>
+      <input type="text" name="identificacion" placeholder="NIT o identificación" required><br>
+      <input type="text" name="direccion" placeholder="Dirección" required><br>
+      <input type="text" name="telefono" placeholder="Teléfono de contacto" required><br>
+      <input type="email" name="email" placeholder="Correo electrónico" required><br>
+      <input type="password" name="contrasena" placeholder="Contraseña" required><br>
+      <input type="password" name="confirmarContrasena" placeholder="Confirmar contraseña" required><br>
+      <button type="submit">Registrar Organización</button>
+    </form>
+  </div>
+</body>
+</html>

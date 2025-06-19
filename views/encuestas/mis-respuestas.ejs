@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Respuestas</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .encuesta { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+    .pregunta { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <h1>Mis Respuestas</h1>
+
+  <% if (respuestas.length === 0) { %>
+    <p>No has respondido ninguna encuesta aún.</p>
+  <% } %>
+
+  <% respuestas.forEach(respuesta => { %>
+    <div class="encuesta">
+      <h2><%= respuesta.encuesta.titulo %></h2>
+      <p><strong>Fecha:</strong> <%= new Date(respuesta.fecha).toLocaleDateString() %></p>
+
+      <% respuesta.respuestas.forEach((r, idx) => { 
+           const pregunta = respuesta.encuesta.preguntas.find(p => p._id.toString() === r.preguntaId.toString());
+      %>
+        <div class="pregunta">
+          <strong><%= pregunta ? pregunta.texto : 'Pregunta eliminada' %></strong><br>
+          <em>Tu respuesta:</em> <%= r.respuesta %>
+        </div>
+      <% }) %>
+    </div>
+  <% }) %>
+  <%- include('../partials/footer') %>
+</body>
+</html>

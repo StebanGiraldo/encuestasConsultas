@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados PDF - <%= encuesta.titulo %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind para estilo limpio -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      canvas {
+        break-inside: avoid;
+      }
+    }
+    body {
+      font-family: sans-serif;
+      background: white;
+    }
+    h1, h2, h3 {
+      color: #1f2937;
+    }
+  </style>
+
+  <!-- Chart.js para las gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="text-gray-900 text-sm leading-relaxed p-8">
+  <header class="mb-6">
+    <h1 class="text-2xl font-bold">📋 Resultados de Encuesta</h1>
+    <p><strong>Título:</strong> <%= encuesta.titulo %></p>
+    <p><strong>Fecha de creación:</strong> <%= encuesta.fechaCreacion.toLocaleDateString() %></p>
+  </header>
+
+  <!-- Resumen -->
+  <section class="mb-6">
+    <h2 class="text-lg font-semibold mb-2">Resumen</h2>
+    <p><strong>Total de Respuestas:</strong> <%= respuestasPorSemana ? Object.values(respuestasPorSemana).reduce((a, b) => a + b, 0) : 0 %></p>
+    <p><strong>Total de Preguntas:</strong> <%= analisisPorPregunta.length %></p>
+  </section>
+
+  <!-- Gráficos generales -->
+  <section class="mb-10">
+    <div class="grid grid-cols-1 gap-6">
+      <div>
+        <h3 class="text-base font-semibold mb-1">📊 Respuestas por Semana</h3>
+        <canvas id="graficoSemanal" height="200"></canvas>
+      </div>
+      <div>
+        <h3 class="text-base font-semibold mb-1">🎂 Distribución por Edad</h3>
+        <canvas id="graficoEdad" height="200"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Análisis por Pregunta -->
+  <section>
+    <h2 class="text-lg font-semibold mb-4">🧠 Análisis por Pregunta</h2>
+    <% analisisPorPregunta.forEach((item, i) => { %>
+      <div class="mb-6">
+        <h4 class="font-semibold mb-2"><%= i + 1 %>. <%= item.texto %></h4>
+
+        <% if (item.tipo === 'cerrada') { %>
+          <canvas id="grafico-pregunta-<%= i %>" height="150"></canvas>
+
+        <% } else if (item.tipo === 'abierta') { %>
+          <% if (item.respuestas.length > 0) { %>
+            <ul class="list-disc list-inside text-gray-700">
+              <% item.respuestas.forEach(r => { %>
+                <li>"<%= r %>"</li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <p>No hay respuestas aún.</p>
+          <% } %>
+
+        <% } else if (item.tipo === 'escala') { %>
+          <p><strong>Promedio:</strong> <%= item.promedio %></p>
+        <% } %>
+      </div>
+    <% }) %>
+  </section>
+
+  <!-- Script para renderizar gráficos -->
+  <script>
+    // 📊 Gráfico Respuestas por Semana
+    new Chart(document.getElementById('graficoSemanal').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(Object.keys(respuestasPorSemana)) %>,
+        datasets: [{
+          label: 'Respuestas',
+          data: <%- JSON.stringify(Object.values(respuestasPorSemana)) %>,
+          backgroundColor: '#60a5fa'
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    // 📊 Gráfico Distribución por Edad
+    new Chart(document.getElementById('graficoEdad').getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: <%- JSON.stringify(Object.keys(distribucionEdad)) %>,
+        datasets: [{
+          data: <%- JSON.stringify(Object.values(distribucionEdad)) %>,
+          backgroundColor: ['#f87171', '#60a5fa', '#a78bfa', '#facc15']
+        }]
+      }
+    });
+
+    // 📊 Gráficos por Pregunta Cerrada
+    <% analisisPorPregunta.forEach((item, i) => { %>
+      <% if (item.tipo === 'cerrada') { %>
+        new Chart(document.getElementById('grafico-pregunta-<%= i %>').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: <%- JSON.stringify(Object.keys(item.conteo)) %>,
+            datasets: [{
+              label: 'Votos',
+              data: <%- JSON.stringify(Object.values(item.conteo)) %>,
+              backgroundColor: '#34d399'
+            }]
+          },
+          options: { responsive: true }
+        });
+      <% } %>
+    <% }); %>
+  </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - EncuestasCiudadanas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-lg">
+    <header class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-blue-600">
+        <a href="/" class="hover:underline">ENCUESTACIUDADANA</a>
+      </h1>
+    </header>
+
+    <h2 class="text-xl font-semibold text-gray-700 text-center mb-2">Crear Cuenta</h2>
+    <p class="text-center text-sm text-gray-500 mb-6">Únete a la plataforma de participación ciudadana</p>
+
+    <!-- Selección de tipo de usuario -->
+    <div class="flex justify-center gap-4 mb-6">
+      <div id="ciudadano" class="cursor-pointer border border-blue-600 rounded-md px-4 py-3 text-center w-1/2 selected bg-blue-50" onclick="selectAccountType('ciudadano')">
+        <strong class="block text-blue-700">Ciudadano</strong>
+        <p class="text-xs text-gray-600">Participa en encuestas</p>
+      </div>
+      <div id="organizacion" class="cursor-pointer border border-gray-300 rounded-md px-4 py-3 text-center w-1/2" onclick="selectAccountType('organizacion')">
+        <strong class="block text-gray-700">Organización</strong>
+        <p class="text-xs text-gray-600">Crea y gestiona encuestas</p>
+      </div>
+    </div>
+
+    <form action="/registro" method="POST" id="registroForm" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" name="nombre" placeholder="Nombre" required class="input-style">
+        <input type="text" name="identificacion" placeholder="Identificación" required class="input-style">
+
+        <!-- Campos Ciudadano -->
+        <div id="ciudadano-fields" class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="number" name="edad" placeholder="Edad" required class="input-style">
+          <select name="sexo" required class="input-style">
+            <option value="">Sexo</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <input type="text" name="departamento" placeholder="Departamento" required class="input-style">
+          <input type="text" name="ocupacion" placeholder="Ocupación" required class="input-style">
+        </div>
+
+        <!-- Campos Organización -->
+        <div id="organizacion-fields" class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+          <input type="text" name="tipoOrganizacion" placeholder="Tipo de Organización" class="input-style">
+          <input type="text" name="direccion" placeholder="Dirección" class="input-style">
+          <input type="text" name="telefono" placeholder="Teléfono" class="input-style">
+        </div>
+
+        <input type="hidden" name="rol" id="rol-field" value="usuario">
+
+        <input type="email" name="email" placeholder="Correo electrónico" required class="input-style col-span-2">
+        <input type="password" name="contrasena" placeholder="Contraseña" required class="input-style col-span-2">
+        <input type="password" name="verificarContrasena" placeholder="Verificar Contraseña" required class="input-style col-span-2">
+      </div>
+
+      <div class="flex items-start gap-2 text-sm text-gray-600 mt-2">
+        <input type="checkbox" id="terms" name="terms" required class="mt-1">
+        <label for="terms">Acepto los <a href="/terminos" class="text-blue-600 hover:underline" target="_blank">Términos</a> y la 
+        <a href="/politicas" class="text-blue-600 hover:underline" target="_blank">Política de Privacidad</a></label>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Registrarse</button>
+    </form>
+
+    <div class="text-center mt-4 text-sm text-gray-600">
+      ¿Ya tienes cuenta?
+      <a href="/login" class="text-blue-600 hover:underline">Ir al Login</a>
+    </div>
+  </div>
+
+  <script>
+    function setAttributesForGroup(selector, attributes) {
+      document.querySelectorAll(selector).forEach(function (el) {
+        if (attributes.required !== undefined) {
+          if (attributes.required) {
+            el.setAttribute('required', 'required');
+          } else {
+            el.removeAttribute('required');
+          }
+        }
+        if (attributes.disabled !== undefined) {
+          el.disabled = attributes.disabled;
+        }
+      });
+    }
+
+    function selectAccountType(type) {
+      document.getElementById('ciudadano').classList.remove('bg-blue-50', 'border-blue-600');
+      document.getElementById('organizacion').classList.remove('bg-blue-50', 'border-blue-600');
+
+      document.getElementById(type).classList.add('bg-blue-50', 'border-blue-600');
+
+      if (type === 'ciudadano') {
+        document.getElementById('rol-field').value = 'usuario';
+        document.getElementById('ciudadano-fields').classList.remove('hidden');
+        document.getElementById('organizacion-fields').classList.add('hidden');
+        setAttributesForGroup('#ciudadano-fields input, #ciudadano-fields select', { disabled: false, required: true });
+        setAttributesForGroup('#organizacion-fields input', { disabled: true, required: false });
+      } else {
+        document.getElementById('rol-field').value = 'entidad';
+        document.getElementById('ciudadano-fields').classList.add('hidden');
+        document.getElementById('organizacion-fields').classList.remove('hidden');
+        setAttributesForGroup('#organizacion-fields input', { disabled: false, required: true });
+        setAttributesForGroup('#ciudadano-fields input, #ciudadano-fields select', { disabled: true, required: false });
+      }
+    }
+
+    document.getElementById('registroForm').addEventListener('submit', function () {
+      var currentRol = document.getElementById('rol-field').value;
+      if (currentRol === 'usuario') {
+        setAttributesForGroup('#ciudadano-fields input, #ciudadano-fields select', { disabled: false });
+      } else {
+        setAttributesForGroup('#organizacion-fields input', { disabled: false });
+      }
+    });
+
+    // Desactivar campos de organización por defecto
+    setAttributesForGroup('#organizacion-fields input', { disabled: true, required: false });
+  </script>
+
+  <style>
+    .input-style {
+      @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Encuestas Públicas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <%- include('../partials/navbar') %>
+
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <h1 class="text-4xl font-bold text-center mb-2">Encuestas <span class="text-purple-600">Públicas</span></h1>
+      <p class="text-center text-gray-600 mb-10">Participa en las consultas ciudadanas activas y haz escuchar tu voz en
+        las decisiones que importan.</p>
+
+      <!-- Buscador y filtros -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <form method="GET" action="/encuestas" class="flex-1">
+          <input type="text" name="busqueda" placeholder="Buscar encuestas..."
+            value="<%= typeof busqueda !== 'undefined' ? busqueda : '' %>"
+            class="w-full p-3 rounded border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+        </form>
+      </div>
+
+      <% if (encuestas.length===0) { %>
+        <p class="text-center text-gray-500">No hay encuestas disponibles para ti según tu perfil.</p>
+        <% } else { %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% encuestas.forEach(encuesta=> { %>
+              <div class="bg-white rounded shadow p-5 border border-gray-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="bg-green-100 text-green-600 text-xs font-semibold px-2 py-1 rounded">Activa</span>
+                  <span class="text-sm text-gray-400">
+                    <%= new Date(encuesta.fechaCreacion).toLocaleDateString('es-ES') %>
+                  </span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">
+                  <%= encuesta.titulo %>
+                </h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  <%= encuesta.descripcion || 'Sin descripción.' %>
+                </p>
+                <div class="text-sm text-gray-500 mb-2">
+                  <p><strong>Tipo:</strong>
+                    <%= encuesta.tipoEncuesta %>
+                  </p>
+                  <p><strong>Preguntas:</strong>
+                    <%= encuesta.cantidadPreguntas %>
+                  </p>
+                  <p><strong>Respuestas:</strong>
+                    <%= encuesta.totalRespuestas %>
+                  </p>
+                </div>
+                <div class="flex justify-between mt-4">
+                  <a href="/encuestas/<%= encuesta._id %>/ver"
+                    class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm">Responder</a>
+                  <a href="/encuestas/resultados/<%= encuesta._id %>"
+                class="bg-gray-200 text-gray-800 px-4 py-1.5 rounded hover:bg-gray-300 transition text-sm">Ver Resultados</a>
+                </div>
+              </div>
+              <% }); %>
+          </div>
+          <% } %>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+
+</html>

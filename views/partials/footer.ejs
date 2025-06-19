@@ -1,0 +1,33 @@
+<style>
+  /* Estilos del footer */
+  footer {
+    background-color: hwb(0 17% 83%);              /* Fondo blanco limpio */
+    border-top: 1px solid hsl(0, 0%, 29%);         /* Borde superior sutil */
+    padding: 20px;                       /* Espaciado generoso */
+    text-align: center;                  /* Centrado del contenido */
+    font-size: 0.9rem;                   /* Tamaño de fuente discreto */
+    color: rgb(245, 245, 245);                         /* Color de texto gris suave */
+    margin-top: 40px;                    /* Separación superior */
+    transition: background 0.3s ease;    /* Transición para futuros cambios */
+  }
+
+  footer p {
+    margin: 0;                         /* Elimina márgenes extra */
+    animation: fadeIn 1s ease-out;      /* Animación al cargar el footer */
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<footer>
+  <p>&copy; 2025 jhoan steban urueña.</p>
+</footer>

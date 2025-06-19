@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="perfil-container">
+    <h2>Gestión de Usuarios</h2>
+    
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+      <a href="/admin/usuarios/nueva" class="btn start-btn">➕ Crear Entidad</a>
+      <a href="/admin/usuarios/entidades" class="btn">🏢 Entidades Registradas</a>
+      <a href="/admin/usuarios/ciudadanos" class="btn">👤 Usuarios Registrados</a>
+    </div>
+  </div>
+</body>
+</html>

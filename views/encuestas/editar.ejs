@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Encuesta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    let contadorPreguntas = <%= encuesta.preguntas.length %>;
+
+    function agregarPregunta() {
+      const container = document.getElementById('preguntas-container');
+      const index = contadorPreguntas;
+      const preguntaHtml = `
+        <div class="pregunta p-4 mb-4 border border-gray-300 rounded-lg bg-white shadow" id="pregunta-${index}">
+          <label class="block font-semibold">Título de la Pregunta:</label>
+          <input type="text" name="preguntas[${index}][texto]" required class="w-full p-2 border border-gray-300 rounded mb-2">
+
+          <label class="block font-semibold">Tipo de Pregunta:</label>
+          <select name="preguntas[${index}][tipo]" onchange="gestionarTipo(${index})" required class="w-full p-2 border border-gray-300 rounded mb-2">
+            <option value="abierta">Abierta</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="escala">Escala</option>
+          </select>
+
+          <div id="opciones-${index}" class="mb-2" style="display: none;">
+            <label class="block font-semibold">Opciones:</label>
+            <div id="lista-opciones-${index}"></div>
+            <button type="button" onclick="agregarOpcion(${index})" class="mt-1 text-sm text-blue-600 hover:underline">Agregar Opción</button>
+          </div>
+
+          <div id="escala-${index}" class="mb-2" style="display: none;">
+            <label class="block font-semibold">Escala:</label>
+            <div class="flex gap-2">
+              <input type="number" name="preguntas[${index}][escalaMin]" placeholder="Min" class="p-2 border rounded w-1/2">
+              <input type="number" name="preguntas[${index}][escalaMax]" placeholder="Max" class="p-2 border rounded w-1/2">
+            </div>
+          </div>
+
+          <button type="button" onclick="eliminarPregunta(${index})" class="text-red-600 text-sm mt-2 hover:underline">Eliminar Pregunta</button>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', preguntaHtml);
+      contadorPreguntas++;
+    }
+
+    function gestionarTipo(index) {
+      const tipo = document.querySelector(`select[name="preguntas[${index}][tipo]"]`).value;
+      document.getElementById(`opciones-${index}`).style.display = tipo === "cerrada" ? "block" : "none";
+      document.getElementById(`escala-${index}`).style.display = tipo === "escala" ? "block" : "none";
+    }
+
+    function agregarOpcion(index) {
+      const lista = document.getElementById(`lista-opciones-${index}`);
+      const opcionHtml = `<input type="text" name="preguntas[${index}][opciones][]" placeholder="Nueva opción" class="w-full p-2 border border-gray-300 rounded mb-1">`;
+      lista.insertAdjacentHTML('beforeend', opcionHtml);
+    }
+
+    function eliminarPregunta(index) {
+      const container = document.getElementById('preguntas-container');
+      const preguntasActuales = container.querySelectorAll('.pregunta');
+      if (preguntasActuales.length <= 1) {
+        alert('La encuesta debe tener al menos una pregunta.');
+        return;
+      }
+      const div = document.getElementById(`pregunta-${index}`);
+      if (div) div.remove();
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <%- include('../partials/navbar') %>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Editar Encuesta</h1>
+
+    <form action="/encuestas/editar/<%= encuesta._id %>" method="POST" class="bg-white p-6 rounded-lg shadow">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Columna izquierda (2/3) -->
+        <div class="md:col-span-2 space-y-4">
+          <div>
+            <label class="font-semibold block mb-1">Título:</label>
+            <input type="text" name="titulo" value="<%= encuesta.titulo %>" required class="w-full p-2 border border-gray-300 rounded">
+          </div>
+
+          <div>
+            <label class="font-semibold block mb-1">Descripción:</label>
+            <textarea name="descripcion" rows="3" class="w-full p-2 border border-gray-300 rounded"><%= encuesta.descripcion %></textarea>
+          </div>
+
+          <div>
+            <label class="font-semibold block mb-1">Tipo de Encuesta:</label>
+            <select name="tipoEncuesta" required class="w-full p-2 border border-gray-300 rounded">
+              <option value="abierta" <%= encuesta.tipoEncuesta === 'abierta' ? 'selected' : '' %>>Abierta</option>
+              <option value="cerrada" <%= encuesta.tipoEncuesta === 'cerrada' ? 'selected' : '' %>>Cerrada</option>
+              <option value="escala" <%= encuesta.tipoEncuesta === 'escala' ? 'selected' : '' %>>Escala</option>
+            </select>
+          </div>
+
+          <div>
+            <h3 class="text-xl font-semibold mt-4 mb-2">Preguntas</h3>
+            <div id="preguntas-container" class="space-y-4">
+              <% encuesta.preguntas.forEach((p, i) => { %>
+                <div class="pregunta p-4 border border-gray-300 rounded bg-white shadow" id="pregunta-<%= i %>">
+                  <label class="block font-semibold">Título:</label>
+                  <input type="text" name="preguntas[<%= i %>][texto]" value="<%= p.texto %>" required class="w-full p-2 border border-gray-300 rounded mb-2">
+
+                  <label class="block font-semibold">Tipo:</label>
+                  <select name="preguntas[<%= i %>][tipo]" onchange="gestionarTipo(<%= i %>)" required class="w-full p-2 border border-gray-300 rounded mb-2">
+                    <option value="abierta" <%= p.tipo === 'abierta' ? 'selected' : '' %>>Abierta</option>
+                    <option value="cerrada" <%= p.tipo === 'cerrada' ? 'selected' : '' %>>Cerrada</option>
+                    <option value="escala" <%= p.tipo === 'escala' ? 'selected' : '' %>>Escala</option>
+                  </select>
+
+                  <div id="opciones-<%= i %>" style="display: <%= p.tipo === 'cerrada' ? 'block' : 'none' %>;">
+                    <label class="font-semibold">Opciones:</label>
+                    <div id="lista-opciones-<%= i %>" class="space-y-1">
+                      <% (p.opciones || []).forEach(op => { %>
+                        <input type="text" name="preguntas[<%= i %>][opciones][]" value="<%= op %>" class="w-full p-2 border rounded">
+                      <% }) %>
+                    </div>
+                    <button type="button" onclick="agregarOpcion(<%= i %>)" class="text-blue-600 hover:underline text-sm mt-1">Agregar Opción</button>
+                  </div>
+
+                  <div id="escala-<%= i %>" style="display: <%= p.tipo === 'escala' ? 'block' : 'none' %>;">
+                    <label class="font-semibold block mt-2">Escala:</label>
+                    <div class="flex gap-2">
+                      <input type="number" name="preguntas[<%= i %>][escalaMin]" value="<%= p.escala?.min %>" class="p-2 border rounded w-1/2">
+                      <input type="number" name="preguntas[<%= i %>][escalaMax]" value="<%= p.escala?.max %>" class="p-2 border rounded w-1/2">
+                    </div>
+                  </div>
+
+                  <button type="button" onclick="eliminarPregunta(<%= i %>)" class="text-red-600 text-sm mt-2 hover:underline">Eliminar Pregunta</button>
+                </div>
+              <% }) %>
+            </div>
+            <button type="button" onclick="agregarPregunta()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Agregar Pregunta</button>
+          </div>
+        </div>
+
+        <!-- Columna derecha (1/3) -->
+        <div class="segmentacion bg-gray-100 p-4 rounded-lg shadow space-y-4">
+          <h3 class="text-xl font-semibold">Segmentación</h3>
+
+          <div>
+            <label class="block font-semibold">Edad Mínima:</label>
+            <input type="number" name="edadMin" value="<%= encuesta.segmentacion.edad.min %>" class="w-full p-2 border border-gray-300 rounded">
+          </div>
+
+          <div>
+            <label class="block font-semibold">Edad Máxima:</label>
+            <input type="number" name="edadMax" value="<%= encuesta.segmentacion.edad.max %>" class="w-full p-2 border border-gray-300 rounded">
+          </div>
+
+          <div>
+            <label class="block font-semibold">Departamento:</label>
+            <input type="text" name="departamento" value="<%= encuesta.segmentacion.departamento.join(', ') %>" class="w-full p-2 border border-gray-300 rounded">
+          </div>
+
+          <div>
+            <label class="block font-semibold">Ocupación:</label>
+            <input type="text" name="ocupacion" value="<%= encuesta.segmentacion.ocupacion.join(', ') %>" class="w-full p-2 border border-gray-300 rounded">
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <button type="submit" class="w-full md:w-auto px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">Actualizar Encuesta</button>
+      </div>
+    </form>
+  </div>
+  <%- include('../partials/footer') %>
+</body>
+</html>

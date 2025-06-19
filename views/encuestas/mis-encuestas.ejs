@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Encuestas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            success: '#22c55e',
+            draft: '#facc15',
+            closed: '#f87171',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <%- include('../partials/navbar') %>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">Mis Encuestas</h1>
+        <p class="text-gray-500">Gestiona y analiza tus consultas ciudadanas</p>
+      </div>
+      <a href="/encuestas/crear"
+        class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition">
+        + Nueva Encuesta
+      </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white shadow rounded-lg p-4 flex items-center gap-4">
+        <div class="text-blue-600 text-2xl">📊</div>
+        <div>
+          <p class="text-sm text-gray-500">Total</p>
+          <p class="text-xl font-semibold"><%= encuestas.length %></p>
+        </div>
+      </div>
+      <div class="bg-white shadow rounded-lg p-4 flex items-center gap-4">
+        <div class="text-green-500 text-2xl">✅</div>
+        <div>
+          <p class="text-sm text-gray-500">Activas</p>
+          <p class="text-xl font-semibold"><%= encuestas.length %></p>
+        </div>
+      </div>
+    </div>
+
+    <% if (encuestas.length === 0) { %>
+      <p class="text-gray-500">Aún no has creado ninguna encuesta.</p>
+    <% } else { %>
+      <div class="space-y-6">
+        <% encuestas.forEach(encuesta => { %>
+          <div class="bg-white p-6 rounded-lg shadow relative">
+            <!-- Estado -->
+            <h2 class="text-xl font-bold mb-1 text-gray-800">
+              <a class="hover:underline">
+                <%= encuesta.titulo %>
+              </a>
+            </h2>
+            <p class="text-sm text-gray-500 mb-2"><%= encuesta.descripcion %></p>
+            <div class="text-sm text-gray-400 mb-4 flex items-center gap-4">
+            </div>
+
+            <div class="flex gap-3 mt-2">
+              <a href="/encuestas/resultados/<%= encuesta._id %>"
+                class="bg-gray-200 text-gray-800 px-4 py-1.5 rounded hover:bg-gray-300 transition text-sm">Ver Resultados</a>
+              <a href="/encuestas/editar/<%= encuesta._id %>"
+                class="bg-yellow-400 text-white px-4 py-1.5 rounded hover:bg-yellow-500 transition text-sm">Editar</a>
+            </div>
+
+            <p class="text-xs text-gray-400 absolute bottom-3 right-4">ID: <%= encuesta._id %></p>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+</body>
+
+</html>
