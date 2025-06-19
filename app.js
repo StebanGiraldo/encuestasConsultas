@@ -4,17 +4,19 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
 const flash = require('connect-flash');
-const http = require('http');          // Módulo HTTP
-const socketIo = require('socket.io'); // Socket.io
+const http = require('http');
+const socketIo = require('socket.io');
+require("dotenv").config();
 
 const Usuario = require('./models/Usuario');
 
 const app = express();
 
 // 📡 Conexión a MongoDB
-mongoose.connect('mongodb+srv://administrador:admin123456@m0.qqattbp.mongodb.net/miBase?retryWrites=true&w=majority')
-  .then(() => console.log('✅ Conectado a MongoDB'))
-  .catch(err => console.error('❌ Error conectando a MongoDB:', err));
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("Conectado a MongoDB"))
+  .catch(err => console.error("Error de conexión", err));
 
 // Configuración del servidor
 app.set('view engine', 'ejs');
